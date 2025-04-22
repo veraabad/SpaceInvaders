@@ -9,32 +9,36 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 # Add the executable
 add_executable(main main.cpp)
 
-# Find required packages
 find_package(OpenGL REQUIRED)
-
-# Link GLFW and GLEW (assumes they are installed and findable via pkg-config or system path)
 find_package(PkgConfig REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
-pkg_search_module(GLEW REQUIRED glew)
+
+pkg_check_modules(GLFW REQUIRED glfw3)
+pkg_check_modules(GLEW REQUIRED glew)
+
+find_library(GLEW_ACTUAL_LIB NAMES GLEW glew PATHS ${GLEW_LIBRARY_DIRS})
+find_library(GLFW_ACTUAL_LIB NAMES glfw PATHS ${GLFW_LIBRARY_DIRS})
+
+message(STATUS "Resolved GLEW to: ${GLEW_ACTUAL_LIB}")
+message(STATUS "Resolved GLFW to: ${GLFW_ACTUAL_LIB}")
+# Print debugging info
 message(STATUS "GLEW_INCLUDE_DIRS: ${GLEW_INCLUDE_DIRS}")
+message(STATUS "GLEW_LIBRARY_DIRS: ${GLEW_LIBRARY_DIRS}")
 message(STATUS "GLEW_LIBRARIES: ${GLEW_LIBRARIES}")
 message(STATUS "GLFW_INCLUDE_DIRS: ${GLFW_INCLUDE_DIRS}")
+message(STATUS "GLFW_LIBRARY_DIRS: ${GLFW_LIBRARY_DIRS}")
 message(STATUS "GLFW_LIBRARIES: ${GLFW_LIBRARIES}")
-get_target_property(LINK_LIBS main LINK_LIBRARIES)
-message(STATUS "main is linking with: ${LINK_LIBS}")
-# Include directories
-include_directories(${GLFW_INCLUDE_DIRS})
-include_directories(${GLEW_INCLUDE_DIRS})
 
-# Link libraries
+# Include directories from pkg-config
+include_directories(${GLEW_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
+link_directories(${GLEW_LIBRARY_DIRS} ${GLFW_LIBRARY_DIRS})
+
+# Link to actual libraries and macOS framework
 target_link_libraries(main
-    ${GLEW_LIBRARIES}
-    ${GLFW_LIBRARIES}
-    ${OPENGL_gl_LIBRARY}
+    ${GLEW_ACTUAL_LIB}
+    ${GLFW_ACTUAL_LIB}
+    "-framework OpenGL"
 )
 
-# macOS specific: link to OpenGL framework
-if(APPLE)
-    target_link_libraries(main "-framework OpenGL")
-endif()
-
+# Double-check what's being linked
+get_target_property(LINK_LIBS main LINK_LIBRARIES)
+message(STATUS "main is linking with: ${LINK_LIBS}")
