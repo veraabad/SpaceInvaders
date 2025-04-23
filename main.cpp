@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 bool game_running = false;
+int move_dir = 0;
 
 struct Buffer
 {
@@ -112,6 +113,20 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_ESCAPE:
             if (action == GLFW_PRESS) {
                 game_running = false;
+            }
+            break;
+        case GLFW_KEY_RIGHT:
+            if (action == GLFW_PRESS) {
+                move_dir += 1;
+            } else if (action == GLFW_RELEASE) {
+                move_dir -= 1;
+            }
+            break;
+        case GLFW_KEY_LEFT:
+            if (action == GLFW_PRESS) {
+                move_dir -= 1;
+            } else if (action == GLFW_RELEASE) {
+                move_dir += 1;
             }
             break;
         default:
@@ -341,8 +356,6 @@ int main()
 
     uint32_t clear_color = rgb_to_uint32(0, 128, 0);
 
-    int player_move_dir = 1;
-
     game_running = true;
 
     // Game loop
@@ -380,14 +393,16 @@ int main()
 
         glfwSwapBuffers(window);
 
-        if (game.player.x + player_sprite.width + player_move_dir >= game.width - 1) {
-            game.player.x = game.width - player_sprite.width - player_move_dir - 1;
-            player_move_dir *= -1;
-        } else if ((int)game.player.x + player_move_dir <= 0) {
-            game.player.x = 0;
-            player_move_dir *= -1;
-        } else {
-            game.player.x += player_move_dir;
+        int player_move_dir = 2 * move_dir;
+
+        if (player_move_dir != 0) {
+            if (game.player.x + player_sprite.width + player_move_dir >= game.width) {
+                game.player.x = game.width - player_sprite.width;
+            } else if ((int)game.player.x + player_move_dir <= 0) {
+                game.player.x = 0;
+            } else {
+                game.player.x += player_move_dir;
+            }
         }
 
         glfwPollEvents();
