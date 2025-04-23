@@ -3,6 +3,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+bool game_running = false;
+
 struct Buffer
 {
     size_t width;
@@ -105,6 +107,18 @@ bool validate_program(GLuint program)
     return true;
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    switch (key) {
+        case GLFW_KEY_ESCAPE:
+            if (action == GLFW_PRESS) {
+                game_running = false;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 void error_callback(int error, const char* description) 
 {
     fprintf(stderr, "Error %d: %s\n", error, description);
@@ -131,6 +145,8 @@ int main()
         glfwTerminate();
         return -1;
     }
+
+    glfwSetKeyCallback(window, key_callback);
 
     glfwMakeContextCurrent(window);
 
@@ -327,8 +343,10 @@ int main()
 
     int player_move_dir = 1;
 
+    game_running = true;
+
     // Game loop
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window) & game_running) {
         buffer_clear(&buffer, clear_color);
 
         for (size_t ai = 0; ai < game.num_aliens; ++ai) {
