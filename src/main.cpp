@@ -3,67 +3,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "data.hpp"
+#include "utility.hpp"
 
 bool game_running = false;
 int move_dir = 0;
 bool fire_pressed = 0;
 size_t score = 0;
-
-void buffer_sprite_draw(
-    data::Buffer* buffer, const data::Sprite& sprite,
-    size_t x, size_t y, uint32_t color
-){
-    for (size_t xi = 0; xi < sprite.width; ++xi) {
-        for (size_t yi = 0; yi < sprite.height; ++yi) {
-            size_t sy = sprite.height - 1 + y - yi;
-            size_t sx = x + xi;
-            if (sprite.data[yi * sprite.width + xi]
-                && sy < buffer->height && sx < buffer->width) {
-                buffer->data[sy * buffer->width + sx] = color;
-            }
-        }
-    }
-}
-
-uint32_t rgb_to_uint32(uint8_t r, uint8_t g, uint8_t b) 
-{
-    return (r << 24) | (g << 16) | (b << 8) | 0xFF;
-}
-
-void buffer_clear(data::Buffer* buffer, uint32_t color)
-{
-    for (size_t i = 0; i < buffer->width * buffer->height; ++i) {
-        buffer->data[i] = color;
-    }
-}
-
-void validate_shader(GLuint shader, const char* file = 0)
-{
-    static const unsigned int BUFFER_SIZE = 512;
-    char buffer[BUFFER_SIZE];
-    GLsizei length = 0;
-
-    glGetShaderInfoLog(shader, BUFFER_SIZE, &length, buffer);
-
-    if (length > 0) {
-        printf("Shader %d(%s) compile error: %s\n",
-               shader, (file ? file : ""), buffer);
-    }
-}
-
-bool validate_program(GLuint program)
-{
-    static const GLsizei BUFFER_SIZE = 512;
-    GLchar buffer[BUFFER_SIZE];
-    GLsizei length = 0;
-
-    glGetProgramInfoLog(program, BUFFER_SIZE, &length, buffer);
-    if (length > 0) {
-        printf("Program %d link error: %s\n", program, buffer);
-        return false;
-    }
-    return true;
-}
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     switch (key) {
@@ -96,75 +41,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-bool sprite_overlap_check(
-    const data::Sprite& sp_a, size_t x_a, size_t y_a,
-    const data::Sprite& sp_b, size_t x_b, size_t y_b
-){
-    if (x_a < x_b + sp_b.width && x_a + sp_a.width > x_b 
-        && y_a < y_b + sp_b.height && y_a + sp_b.height > y_b) {
-        return true;
-    }
-    return false;
-}
-
-void buffer_draw_text(
-    data::Buffer* buffer,
-    const data::Sprite& text_spritesheet,
-    const char* text,
-    size_t x, size_t y,
-    uint32_t color)
-{
-    size_t xp = x;
-    size_t stride = text_spritesheet.width * text_spritesheet.height;
-    data::Sprite sprite = text_spritesheet;
-    for (const char* charp = text; *charp != '\0'; ++charp) {
-        char character = *charp - 32;
-        if (character < 0 || character >= 65) {
-            continue;
-        }
-        sprite.data = text_spritesheet.data + character * stride;
-        buffer_sprite_draw(buffer, sprite, xp, y, color);
-        xp += sprite.width + 1;
-    }
-}
-
-void buffer_draw_number(
-    data::Buffer* buffer,
-    const data::Sprite& number_spritesheet, size_t number,
-    size_t x, size_t y,
-    uint32_t color
-){
-    uint8_t digits[64];
-    size_t num_digits = 0;
-
-    size_t current_number = number;
-    do {
-        digits[num_digits++] = current_number % 10;
-        current_number = current_number / 10;
-    } while (current_number > 0);
-
-    size_t xp = x;
-    size_t stride = number_spritesheet.width * number_spritesheet.height;
-    data::Sprite sprite = number_spritesheet;
-    for (size_t i = 0; i < num_digits; ++i) {
-        uint8_t digit = digits[num_digits - i - 1];
-        sprite.data = number_spritesheet.data + digit * stride;
-        buffer_sprite_draw(buffer, sprite, xp, y, color);
-        xp += sprite.width + 1;
-    }
-}
-
-void error_callback(int error, const char* description) 
-{
-    fprintf(stderr, "Error %d: %s\n", error, description);
-}
-
 int main() 
 {
     const size_t buffer_width = 224;
     const size_t buffer_height = 256;
 
-    glfwSetErrorCallback(error_callback);
+    glfwSetErrorCallback(util::error_callback);
 
     if (!glfwInit()) {
         return -1;
@@ -208,7 +90,7 @@ int main()
     buffer.height = buffer_height;
     buffer.data = new uint32_t[buffer.width * buffer.height];
 
-    buffer_clear(&buffer, 0);
+    util::buffer_clear(&buffer, 0);
 
     // Create texture for presenting buffer to OpenGL
     GLuint buffer_texture;
@@ -262,7 +144,7 @@ int main()
 
         glShaderSource(shader_vp, 1, &vertex_shader, 0);
         glCompileShader(shader_vp);
-        validate_shader(shader_vp, vertex_shader);
+        util::validate_shader(shader_vp, vertex_shader);
         glAttachShader(shader_id, shader_vp);
 
         glDeleteShader(shader_vp);
@@ -274,7 +156,7 @@ int main()
 
         glShaderSource(shader_fp, 1, &fragment_shader, 0);
         glCompileShader(shader_fp);
-        validate_shader(shader_fp, fragment_shader);
+        util::validate_shader(shader_fp, fragment_shader);
         glAttachShader(shader_id, shader_fp);
 
         glDeleteShader(shader_fp);
@@ -282,7 +164,7 @@ int main()
 
     glLinkProgram(shader_id);
 
-    if (!validate_program(shader_id)) {
+    if (!util::validate_program(shader_id)) {
         fprintf(stderr, "Error while validating shader.\n");
         glfwTerminate();
         glDeleteVertexArrays(1, &fullscreen_triangle_vao);
@@ -544,39 +426,39 @@ int main()
         death_counters[i] = 10;
     }
 
-    uint32_t clear_color = rgb_to_uint32(0, 128, 0);
+    uint32_t clear_color = util::rgb_to_uint32(0, 128, 0);
 
     game_running = true;
 
     int player_move_dir = 0;
     // Game loop
     while (!glfwWindowShouldClose(window) & game_running) {
-        buffer_clear(&buffer, clear_color);
+        util::buffer_clear(&buffer, clear_color);
 
-        buffer_draw_text(
+        util::buffer_draw_text(
             &buffer, 
             text_spritesheet, "SCORE",
             4, game.height - text_spritesheet.height - 7,
-            rgb_to_uint32(128, 0, 0)
+            util::rgb_to_uint32(128, 0, 0)
         );
 
-        buffer_draw_number(
+        util::buffer_draw_number(
             &buffer,
             number_spritesheet, score,
             4 + 2 * number_spritesheet.width, game.height - 2 * number_spritesheet.height - 12,
-            rgb_to_uint32(128, 0, 0)
+            util::rgb_to_uint32(128, 0, 0)
         );
 
-        buffer_draw_text(
+        util::buffer_draw_text(
             &buffer, 
             text_spritesheet, "CREDIT 00",
             164, 7,
-            rgb_to_uint32(128, 0, 0)
+            util::rgb_to_uint32(128, 0, 0)
         );
 
         // Line at bottom
         for (size_t i = 0; i < game.width; ++i) {
-            buffer.data[game.width * 16 + i] = rgb_to_uint32(128, 0, 0);
+            buffer.data[game.width * 16 + i] = util::rgb_to_uint32(128, 0, 0);
         }
 
         // Draw aliens
@@ -588,12 +470,12 @@ int main()
 
             const data::Alien& alien = game.aliens[ai];
             if (alien.type == data::ALIEN_DEAD) {
-                buffer_sprite_draw(&buffer, alien_death_sprite, alien.x, alien.y, rgb_to_uint32(128, 0, 0));
+                util::buffer_sprite_draw(&buffer, alien_death_sprite, alien.x, alien.y, util::rgb_to_uint32(128, 0, 0));
             } else {
                 const data::SpriteAnimation& animation = alien_animation[alien.type - 1];
                 size_t current_frame = animation.time / animation.frame_duration;
                 const data::Sprite& sprite = *animation.frames[current_frame];
-                buffer_sprite_draw(&buffer, sprite, alien.x, alien.y, rgb_to_uint32(128, 0, 0));
+                util::buffer_sprite_draw(&buffer, sprite, alien.x, alien.y, util::rgb_to_uint32(128, 0, 0));
             }
         }
 
@@ -601,11 +483,11 @@ int main()
         for (size_t bi = 0; bi < game.num_bullets; ++bi) {
             const data::Bullet& bullet = game.bullets[bi];
             const data::Sprite& sprite = bullet_sprite;
-            buffer_sprite_draw(&buffer, sprite, bullet.x, bullet.y, rgb_to_uint32(128, 0, 0));
+            util::buffer_sprite_draw(&buffer, sprite, bullet.x, bullet.y, util::rgb_to_uint32(128, 0, 0));
         }
 
         // Draw player
-        buffer_sprite_draw(&buffer, player_sprite, game.player.x, game.player.y, rgb_to_uint32(128, 0, 0));
+        util::buffer_sprite_draw(&buffer, player_sprite, game.player.x, game.player.y, util::rgb_to_uint32(128, 0, 0));
 
         // Update animations
         for (size_t i = 0; i < 3; ++i) {
@@ -651,7 +533,7 @@ int main()
                 const data::SpriteAnimation& animation = alien_animation[alien.type - 1];
                 size_t current_frame = animation.time / animation.frame_duration;
                 const data::Sprite& alien_sprite = *animation.frames[current_frame];
-                bool overlap = sprite_overlap_check(
+                bool overlap = util::sprite_overlap_check(
                     bullet_sprite, game.bullets[bi].x, game.bullets[bi].y,
                     alien_sprite, alien.x, alien.y
                 );

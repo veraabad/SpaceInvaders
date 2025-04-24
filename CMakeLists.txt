@@ -25,7 +25,10 @@ find_library(GLFW_ACTUAL_LIB NAMES glfw PATHS ${GLFW_LIBRARY_DIRS} /usr/local/li
 message(STATUS "Resolved GLEW to: ${GLEW_ACTUAL_LIB}")
 message(STATUS "Resolved GLFW to: ${GLFW_ACTUAL_LIB}")
 
-add_executable(${APP_NAME} src/main.cpp)
+add_executable(${APP_NAME} 
+    src/main.cpp 
+    src/utility.cpp
+)
 
 target_link_libraries(${APP_NAME}
     ${GLEW_ACTUAL_LIB}
