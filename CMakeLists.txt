@@ -1,3 +1,4 @@
+set(APP_NAME SpaceInvaders)
 cmake_minimum_required(VERSION 3.10)
 project(OpenGLApp)
 
@@ -14,7 +15,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLFW REQUIRED glfw3)
 pkg_check_modules(GLEW REQUIRED glew)
 
-include_directories(${GLEW_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
+include_directories(${GLEW_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} "src/include")
 link_directories(${GLEW_LIBRARY_DIRS} ${GLFW_LIBRARY_DIRS})
 
 # Find actual libs
@@ -24,9 +25,9 @@ find_library(GLFW_ACTUAL_LIB NAMES glfw PATHS ${GLFW_LIBRARY_DIRS} /usr/local/li
 message(STATUS "Resolved GLEW to: ${GLEW_ACTUAL_LIB}")
 message(STATUS "Resolved GLFW to: ${GLFW_ACTUAL_LIB}")
 
-add_executable(main main.cpp)
+add_executable(${APP_NAME} src/main.cpp)
 
-target_link_libraries(main
+target_link_libraries(${APP_NAME}
     ${GLEW_ACTUAL_LIB}
     ${GLFW_ACTUAL_LIB}
     "-framework OpenGL"
