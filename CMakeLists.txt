@@ -28,6 +28,7 @@ message(STATUS "Resolved GLFW to: ${GLFW_ACTUAL_LIB}")
 add_executable(${APP_NAME} 
     src/main.cpp 
     src/utility.cpp
+    src/aliens.cpp
 )
 
 target_link_libraries(${APP_NAME}
