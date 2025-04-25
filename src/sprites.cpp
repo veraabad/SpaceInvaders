@@ -55,6 +55,11 @@ const data::Sprite PLAYER_SPRITE{
     const_cast<uint8_t*>(PLAYER)
 };
 
+const data::Sprite BULLET_SPRITE{
+    {1, 3}, // width, height
+    const_cast<uint8_t*>(BULLET)
+};
+
 const data::Sprite TEXT_SPRITESHEET{
     {5, 7}, // width, height
     const_cast<uint8_t*>(TEXT_SP)

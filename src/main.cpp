@@ -188,16 +188,6 @@ int main()
     // Prepare game
     sprites::initialize_aliens();
 
-    data::Sprite bullet_sprite;
-    bullet_sprite.width = 1;
-    bullet_sprite.height = 3;
-    bullet_sprite.data = new uint8_t[3]
-    {
-        1, // @
-        1, // @
-        1  // @
-    };
-
     data::Game game;
     game.width = buffer_width;
     game.height = buffer_height;
@@ -283,7 +273,7 @@ int main()
         // Draw bullets
         for (size_t bi = 0; bi < game.num_bullets; ++bi) {
             const data::Bullet& bullet = game.bullets[bi];
-            const data::Sprite& sprite = bullet_sprite;
+            const data::Sprite& sprite = sprites::BULLET_SPRITE;
             util::buffer_sprite_draw(&buffer, sprite, bullet.x, bullet.y, util::rgb_to_uint32(128, 0, 0));
         }
 
@@ -320,7 +310,7 @@ int main()
         // Set direction of bullets
         for (size_t bi = 0; bi < game.num_bullets;) {
             game.bullets[bi].y += game.bullets[bi].dir;
-            if (game.bullets[bi].y >= game.height || game.bullets[bi].y < bullet_sprite.height) {
+            if (game.bullets[bi].y >= game.height || game.bullets[bi].y < sprites::BULLET_SPRITE.height) {
                 game.bullets[bi] = game.bullets[game.num_bullets - 1];
                 --game.num_bullets;
                 continue;
@@ -335,7 +325,7 @@ int main()
                 size_t current_frame = animation.time / animation.frame_duration;
                 const data::Sprite& alien_sprite = *animation.frames[current_frame];
                 bool overlap = util::sprite_overlap_check(
-                    bullet_sprite, game.bullets[bi].x, game.bullets[bi].y,
+                    sprites::BULLET_SPRITE, game.bullets[bi].x, game.bullets[bi].y,
                     alien_sprite, alien.x, alien.y
                 );
                 if (overlap) {

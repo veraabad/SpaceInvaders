@@ -14,5 +14,12 @@ constexpr uint8_t PLAYER[] = {
         1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
     };
 
+constexpr uint8_t BULLET[] = {
+        1, // @
+        1, // @
+        1  // @
+    };
+
 extern const data::Sprite PLAYER_SPRITE;
+extern const data::Sprite BULLET_SPRITE;
 } // sprites
