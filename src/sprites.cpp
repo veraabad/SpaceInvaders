@@ -1,5 +1,6 @@
 #include "sprites/aliens.hpp"
 #include "sprites/player.hpp"
+#include "sprites/text.hpp"
 
 namespace sprites {
 
@@ -52,6 +53,16 @@ data::SpriteAnimation ALIEN_ANIMATIONS[3] = {
 const data::Sprite PLAYER_SPRITE{
     {11, 7}, // width, height
     const_cast<uint8_t*>(PLAYER)
+};
+
+const data::Sprite TEXT_SPRITESHEET{
+    {5, 7}, // width, height
+    const_cast<uint8_t*>(TEXT_SP)
+};
+
+const data::Sprite NUMBER_SPRITESHEET{
+    {5, 7}, // width, height
+    const_cast<uint8_t*>(TEXT_SP + 16 * 35)
 };
 
 void initialize_aliens() 
