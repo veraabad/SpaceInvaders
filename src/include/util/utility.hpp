@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <GLFW/glfw3.h>
-#include "data.hpp"
+#include "data/data.hpp"
 
 namespace util {
 

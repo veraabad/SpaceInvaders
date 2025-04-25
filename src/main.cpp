@@ -2,8 +2,8 @@
 #include <cstdint>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "data.hpp"
-#include "utility.hpp"
+#include "data/data.hpp"
+#include "util/utility.hpp"
 
 bool game_running = false;
 int move_dir = 0;
