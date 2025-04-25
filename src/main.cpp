@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "sprites/aliens.hpp"
+#include "sprites/player.hpp"
 #include "data/data.hpp"
 #include "util/utility.hpp"
 
@@ -186,20 +187,6 @@ int main()
     // Prepare game
     sprites::initialize_aliens();
 
-    data::Sprite player_sprite;
-    player_sprite.width = 11;
-    player_sprite.height = 7;
-    player_sprite.data = new uint8_t[77]
-    {
-        0,0,0,0,0,1,0,0,0,0,0, // .....@.....
-        0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
-        0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
-        0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
-        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-    };
-
     data::Sprite text_spritesheet;
     text_spritesheet.width = 5;
     text_spritesheet.height = 7;
@@ -379,7 +366,7 @@ int main()
         }
 
         // Draw player
-        util::buffer_sprite_draw(&buffer, player_sprite, game.player.x, game.player.y, util::rgb_to_uint32(128, 0, 0));
+        util::buffer_sprite_draw(&buffer, sprites::PLAYER_SPRITE, game.player.x, game.player.y, util::rgb_to_uint32(128, 0, 0));
 
         // Update animations
         for (size_t i = 0; i < 3; ++i) {
@@ -445,8 +432,8 @@ int main()
         player_move_dir = 2 * move_dir;
 
         if (player_move_dir != 0) {
-            if (game.player.x + player_sprite.width + player_move_dir >= game.width) {
-                game.player.x = game.width - player_sprite.width;
+            if (game.player.x + sprites::PLAYER_SPRITE.width + player_move_dir >= game.width) {
+                game.player.x = game.width - sprites::PLAYER_SPRITE.width;
             } else if ((int)game.player.x + player_move_dir <= 0) {
                 game.player.x = 0;
             } else {
@@ -455,8 +442,8 @@ int main()
         }
 
         if (fire_pressed && game.num_bullets < GAME_MAX_BULLETS) {
-            game.bullets[game.num_bullets].x = game.player.x + player_sprite.width / 2;
-            game.bullets[game.num_bullets].y = game.player.y + player_sprite.height;
+            game.bullets[game.num_bullets].x = game.player.x + sprites::PLAYER_SPRITE.width / 2;
+            game.bullets[game.num_bullets].y = game.player.y + sprites::PLAYER_SPRITE.height;
             game.bullets[game.num_bullets].dir = 2;
             ++game.num_bullets;
         }
