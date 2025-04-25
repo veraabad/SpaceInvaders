@@ -1,6 +1,8 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include <vector>
+#include <algorithm>
 
 namespace data {
 
@@ -26,21 +28,6 @@ struct Rectangle {
 struct Location {
     size_t x;
     size_t y;
-};
-
-/**
- * @brief A buffer of pixel data with a specified width and height.
- * @details Inherits from Rectangle and adds pixel data storage.
- *
- * @inherit Rectangle
- *    - width: Width of the buffer.
- *    - height: Height of the buffer.
- *
- * @var data Pointer to pixel data of the buffer.
- */
-struct Buffer final: Rectangle
-{
-    uint32_t* data;
 };
 
 /**
@@ -158,6 +145,117 @@ enum AlienType: uint8_t
     ALIEN_TYPE_A = 1,
     ALIEN_TYPE_B = 2,
     ALIEN_TYPE_C = 3
+};
+
+/**
+ * @brief A buffer of pixel data with a specified width and height.
+ * @details Inherits from Rectangle and adds pixel data storage.
+ *
+ * @inherit Rectangle
+ *    - width: Width of the buffer.
+ *    - height: Height of the buffer.
+ *
+ * @var data Pointer to pixel data of the buffer.
+ */
+class Buffer 
+{
+public:
+    Buffer(size_t width, size_t height) : width(width), height(height) 
+    {
+        data = std::vector<uint32_t>(width * height, 0);
+    }
+    ~Buffer(){}
+
+    size_t getWidth()
+    {
+        return width;
+    }
+
+    size_t getHeight()
+    {
+        return height;
+    }
+
+    uint32_t* getData()
+    {
+        return data.data();
+    }
+
+    std::vector<uint32_t>& getVector()
+    {
+        return data;
+    }
+
+    void clear(uint32_t color) 
+    {
+        std::fill(data.begin(), data.end(), color);
+    }
+
+    void draw_sprite(
+        const Sprite& sprite,
+        size_t x, size_t y, uint32_t color
+    ){
+        for (size_t xi = 0; xi < sprite.width; ++xi) {
+            for (size_t yi = 0; yi < sprite.height; ++yi) {
+                size_t sy = sprite.height - 1 + y - yi;
+                size_t sx = x + xi;
+                if (sprite.data[yi * sprite.width + xi]
+                    && sy < height && sx < width) {
+                    data[sy * width + sx] = color;
+                }
+            }
+        }
+    }
+
+    void draw_text(
+        const data::Sprite& text_spritesheet,
+        const char* text,
+        size_t x, size_t y,
+        uint32_t color)
+    {
+        size_t xp = x;
+        size_t stride = text_spritesheet.width * text_spritesheet.height;
+        data::Sprite sprite = text_spritesheet;
+        for (const char* charp = text; *charp != '\0'; ++charp) {
+            char character = *charp - 32;
+            if (character < 0 || character >= 65) {
+                continue;
+            }
+            sprite.data = text_spritesheet.data + character * stride;
+            draw_sprite(sprite, xp, y, color);
+            xp += sprite.width + 1;
+        }
+    }
+
+    void draw_number(
+        const data::Sprite& number_spritesheet, size_t number,
+        size_t x, size_t y,
+        uint32_t color
+    ){
+        uint8_t digits[64];
+        size_t num_digits = 0;
+
+        size_t current_number = number;
+        do {
+            digits[num_digits++] = current_number % 10;
+            current_number = current_number / 10;
+        } while (current_number > 0);
+
+        size_t xp = x;
+        size_t stride = number_spritesheet.width * number_spritesheet.height;
+        data::Sprite sprite = number_spritesheet;
+        for (size_t i = 0; i < num_digits; ++i) {
+            uint8_t digit = digits[num_digits - i - 1];
+            sprite.data = number_spritesheet.data + digit * stride;
+            draw_sprite(sprite, xp, y, color);
+            xp += sprite.width + 1;
+        }
+    }
+
+private:
+    size_t width;
+    size_t height;
+    std::vector<uint32_t> data;
 };
 
 }

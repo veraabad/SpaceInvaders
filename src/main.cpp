@@ -88,12 +88,9 @@ int main()
     glClearColor(1.0, 0.0, 0.0, 1.0);
 
     // Create graphics buffer
-    data::Buffer buffer;
-    buffer.width = buffer_width;
-    buffer.height = buffer_height;
-    buffer.data = new uint32_t[buffer.width * buffer.height];
+    data::Buffer buffer(buffer_width, buffer_height);
 
-    util::buffer_clear(&buffer, 0);
+    buffer.clear(0);
 
     // Create texture for presenting buffer to OpenGL
     GLuint buffer_texture;
@@ -101,8 +98,8 @@ int main()
     glBindTexture(GL_TEXTURE_2D, buffer_texture);
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGB8,
-        buffer.width, buffer.height, 0,
-        GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, buffer.data
+        buffer.getWidth(), buffer.getHeight(), 0,
+        GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, buffer.getData()
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -171,7 +168,6 @@ int main()
         fprintf(stderr, "Error while validating shader.\n");
         glfwTerminate();
         glDeleteVertexArrays(1, &fullscreen_triangle_vao);
-        delete[] buffer.data;
         return -1;
     }
 
@@ -224,24 +220,21 @@ int main()
     int player_move_dir = 0;
     // Game loop
     while (!glfwWindowShouldClose(window) & game_running) {
-        util::buffer_clear(&buffer, clear_color);
+        buffer.clear(clear_color);
 
-        util::buffer_draw_text(
-            &buffer, 
+        buffer.draw_text(
             sprites::TEXT_SPRITESHEET, "SCORE",
             4, game.height - sprites::TEXT_SPRITESHEET.height - 7,
             util::rgb_to_uint32(128, 0, 0)
         );
 
-        util::buffer_draw_number(
-            &buffer,
+        buffer.draw_number(
             sprites::NUMBER_SPRITESHEET, score,
             4 + 2 * sprites::NUMBER_SPRITESHEET.width, game.height - 2 * sprites::NUMBER_SPRITESHEET.height - 12,
             util::rgb_to_uint32(128, 0, 0)
         );
 
-        util::buffer_draw_text(
-            &buffer, 
+        buffer.draw_text(
             sprites::TEXT_SPRITESHEET, "CREDIT 00",
             164, 7,
             util::rgb_to_uint32(128, 0, 0)
@@ -249,7 +242,7 @@ int main()
 
         // Line at bottom
         for (size_t i = 0; i < game.width; ++i) {
-            buffer.data[game.width * 16 + i] = util::rgb_to_uint32(128, 0, 0);
+            buffer.getVector()[game.width * 16 + i] = util::rgb_to_uint32(128, 0, 0);
         }
 
         // Draw aliens
@@ -261,12 +254,12 @@ int main()
 
             const data::Alien& alien = game.aliens[ai];
             if (alien.type == data::ALIEN_DEAD) {
-                util::buffer_sprite_draw(&buffer, sprites::ALIEN_DEATH_SPRITE, alien.x, alien.y, util::rgb_to_uint32(128, 0, 0));
+                buffer.draw_sprite(sprites::ALIEN_DEATH_SPRITE, alien.x, alien.y, util::rgb_to_uint32(128, 0, 0));
             } else {
                 const data::SpriteAnimation& animation = sprites::ALIEN_ANIMATIONS[alien.type - 1];
                 size_t current_frame = animation.time / animation.frame_duration;
                 const data::Sprite& sprite = *animation.frames[current_frame];
-                util::buffer_sprite_draw(&buffer, sprite, alien.x, alien.y, util::rgb_to_uint32(128, 0, 0));
+                buffer.draw_sprite(sprite, alien.x, alien.y, util::rgb_to_uint32(128, 0, 0));
             }
         }
 
@@ -274,11 +267,11 @@ int main()
         for (size_t bi = 0; bi < game.num_bullets; ++bi) {
             const data::Bullet& bullet = game.bullets[bi];
             const data::Sprite& sprite = sprites::BULLET_SPRITE;
-            util::buffer_sprite_draw(&buffer, sprite, bullet.x, bullet.y, util::rgb_to_uint32(128, 0, 0));
+            buffer.draw_sprite(sprite, bullet.x, bullet.y, util::rgb_to_uint32(128, 0, 0));
         }
 
         // Draw player
-        util::buffer_sprite_draw(&buffer, sprites::PLAYER_SPRITE, game.player.x, game.player.y, util::rgb_to_uint32(128, 0, 0));
+        buffer.draw_sprite(sprites::PLAYER_SPRITE, game.player.x, game.player.y, util::rgb_to_uint32(128, 0, 0));
 
         // Update animations
         for (size_t i = 0; i < 3; ++i) {
@@ -290,9 +283,9 @@ int main()
 
         glTexSubImage2D(
             GL_TEXTURE_2D, 0, 0, 0,
-            buffer.width, buffer.height,
+            buffer.getWidth(), buffer.getHeight(),
             GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
-            buffer.data
+            buffer.getData()
         );
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -368,7 +361,6 @@ int main()
 
     glDeleteVertexArrays(1, &fullscreen_triangle_vao);
     sprites::cleanup_aliens();
-    delete[] buffer.data;
     delete[] game.aliens;
     delete[] death_counters;
 
