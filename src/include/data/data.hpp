@@ -160,37 +160,80 @@ enum AlienType: uint8_t
 class Buffer
 {
 public:
+    /**
+     * @brief Constructs a Buffer with specified dimensions.
+     *
+     * @param width Width of the buffer in pixels.
+     * @param height Height of the buffer in pixels.
+     */
     Buffer(size_t width, size_t height) : width(width), height(height)
     {
         data = std::vector<uint32_t>(width * height, 0);
     }
+
+    /**
+     * @brief Destructor for Buffer.
+     */
     ~Buffer(){}
 
+    /**
+     * @brief Gets the width of the buffer.
+     *
+     * @return Width of the buffer in pixels.
+     */
     size_t getWidth()
     {
         return width;
     }
 
+    /**
+     * @brief Gets the height of the buffer.
+     *
+     * @return Height of the buffer in pixels.
+     */
     size_t getHeight()
     {
         return height;
     }
 
+    /**
+     * @brief Gets a pointer to the raw pixel data.
+     *
+     * @return Pointer to the beginning of the pixel data array.
+     */
     uint32_t* getData()
     {
         return data.data();
     }
 
+    /**
+     * @brief Gets a reference to the underlying pixel data vector.
+     *
+     * @return Reference to the std::vector containing pixel data.
+     */
     std::vector<uint32_t>& getVector()
     {
         return data;
     }
 
+    /**
+     * @brief Clears the entire buffer with a specified color.
+     *
+     * @param color 32-bit RGBA color value to fill the buffer with.
+     */
     void clear(uint32_t color)
     {
         std::fill(data.begin(), data.end(), color);
     }
 
+    /**
+     * @brief Draws a sprite onto the buffer at a specified position.
+     *
+     * @param sprite The sprite to draw.
+     * @param x X-coordinate position to draw the sprite.
+     * @param y Y-coordinate position to draw the sprite.
+     * @param color 32-bit RGBA color value for the sprite pixels.
+     */
     void drawSprite(
         const Sprite& sprite,
         size_t x, size_t y, uint32_t color
@@ -207,6 +250,15 @@ public:
         }
     }
 
+    /**
+     * @brief Draws text onto the buffer using a text spritesheet.
+     *
+     * @param textSpritesheet Sprite containing character glyphs.
+     * @param text Null-terminated string to draw.
+     * @param x X-coordinate position to start drawing text.
+     * @param y Y-coordinate position to draw text.
+     * @param color 32-bit RGBA color value for the text.
+     */
     void drawText(
         const data::Sprite& textSpritesheet,
         const char* text,
@@ -227,6 +279,15 @@ public:
         }
     }
 
+    /**
+     * @brief Draws a number onto the buffer using a number spritesheet.
+     *
+     * @param numberSpritesheet Sprite containing digit glyphs (0-9).
+     * @param number The number to draw.
+     * @param x X-coordinate position to start drawing the number.
+     * @param y Y-coordinate position to draw the number.
+     * @param color 32-bit RGBA color value for the number.
+     */
     void drawNumber(
         const data::Sprite& numberSpritesheet, size_t number,
         size_t x, size_t y,
