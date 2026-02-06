@@ -3,12 +3,12 @@
 
 namespace util {
 
-uint32_t rgb_to_uint32(uint8_t r, uint8_t g, uint8_t b) 
+uint32_t rgbToUint32(uint8_t r, uint8_t g, uint8_t b)
 {
     return (r << 24) | (g << 16) | (b << 8) | 0xFF;
 }
 
-void validate_shader(GLuint shader, const char* file)
+void validateShader(GLuint shader, const char* file)
 {
     static const unsigned int BUFFER_SIZE = 512;
     char buffer[BUFFER_SIZE];
@@ -22,7 +22,7 @@ void validate_shader(GLuint shader, const char* file)
     }
 }
 
-bool validate_program(GLuint program)
+bool validateProgram(GLuint program)
 {
     static const GLsizei BUFFER_SIZE = 512;
     GLchar buffer[BUFFER_SIZE];
@@ -36,22 +36,20 @@ bool validate_program(GLuint program)
     return true;
 }
 
-bool sprite_overlap_check(
-    const data::Sprite& sp_a, size_t x_a, size_t y_a,
-    const data::Sprite& sp_b, size_t x_b, size_t y_b
+bool spriteOverlapCheck(
+    const data::Sprite& spA, size_t xA, size_t yA,
+    const data::Sprite& spB, size_t xB, size_t yB
 ){
-    if (x_a < x_b + sp_b.width && x_a + sp_a.width > x_b 
-        && y_a < y_b + sp_b.height && y_a + sp_b.height > y_b) {
+    if (xA < xB + spB.width && xA + spA.width > xB
+        && yA < yB + spB.height && yA + spB.height > yB) {
         return true;
     }
     return false;
 }
 
-void error_callback(int error, const char* description) 
+void errorCallback(int error, const char* description)
 {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
 } // util
-
-

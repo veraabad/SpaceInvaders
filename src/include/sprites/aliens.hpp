@@ -84,7 +84,7 @@ extern const data::Sprite ALIEN_SPRITES[6];
 extern const data::Sprite ALIEN_DEATH_SPRITE;
 extern data::SpriteAnimation ALIEN_ANIMATIONS[3];
 
-void initialize_aliens();
-void cleanup_aliens();
+void initializeAliens();
+void cleanupAliens();
 
 } // sprites

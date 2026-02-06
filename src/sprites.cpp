@@ -4,7 +4,7 @@
 
 namespace sprites {
 
-static data::Sprite** animation_frames[3] = {nullptr, nullptr, nullptr};
+static data::Sprite** animationFrames[3] = {nullptr, nullptr, nullptr};
 
 const data::Sprite ALIEN_SPRITES[6] {
     // Alien 1
@@ -70,21 +70,21 @@ const data::Sprite NUMBER_SPRITESHEET{
     const_cast<uint8_t*>(TEXT_SP + 16 * 35)
 };
 
-void initialize_aliens() 
+void initializeAliens()
 {
     for (size_t i = 0; i < 3; ++i) {
-        animation_frames[i] = new data::Sprite*[2];
-        animation_frames[i][0] = const_cast<data::Sprite*>(&ALIEN_SPRITES[2 * i]);
-        animation_frames[i][1] = const_cast<data::Sprite*>(&ALIEN_SPRITES[2 * i + 1]);
-        ALIEN_ANIMATIONS[i].frames = animation_frames[i];
+        animationFrames[i] = new data::Sprite*[2];
+        animationFrames[i][0] = const_cast<data::Sprite*>(&ALIEN_SPRITES[2 * i]);
+        animationFrames[i][1] = const_cast<data::Sprite*>(&ALIEN_SPRITES[2 * i + 1]);
+        ALIEN_ANIMATIONS[i].frames = animationFrames[i];
     }
 }
 
-void cleanup_aliens() 
+void cleanupAliens()
 {
     for (size_t i = 0; i < 3; ++i) {
-        delete[] animation_frames[i];
-        animation_frames[i] = nullptr;
+        delete[] animationFrames[i];
+        animationFrames[i] = nullptr;
     }
 }
 

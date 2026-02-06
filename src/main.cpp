@@ -8,35 +8,35 @@
 #include "data/data.hpp"
 #include "util/utility.hpp"
 
-bool game_running = false;
-int move_dir = 0;
-bool fire_pressed = 0;
+bool gameRunning = false;
+int moveDir = 0;
+bool firePressed = 0;
 size_t score = 0;
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     switch (key) {
         case GLFW_KEY_ESCAPE:
             if (action == GLFW_PRESS) {
-                game_running = false;
+                gameRunning = false;
             }
             break;
         case GLFW_KEY_RIGHT:
             if (action == GLFW_PRESS) {
-                move_dir += 1;
+                moveDir += 1;
             } else if (action == GLFW_RELEASE) {
-                move_dir -= 1;
+                moveDir -= 1;
             }
             break;
         case GLFW_KEY_LEFT:
             if (action == GLFW_PRESS) {
-                move_dir -= 1;
+                moveDir -= 1;
             } else if (action == GLFW_RELEASE) {
-                move_dir += 1;
+                moveDir += 1;
             }
             break;
         case GLFW_KEY_SPACE:
             if (action == GLFW_RELEASE) {
-                fire_pressed = true;
+                firePressed = true;
             }
             break;
         default:
@@ -44,12 +44,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-int main() 
+int main()
 {
-    const size_t buffer_width = 224;
-    const size_t buffer_height = 256;
+    const size_t bufferWidth = 224;
+    const size_t bufferHeight = 256;
 
-    glfwSetErrorCallback(util::error_callback);
+    glfwSetErrorCallback(util::errorCallback);
 
     if (!glfwInit()) {
         return -1;
@@ -60,13 +60,13 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    GLFWwindow* window = glfwCreateWindow(2 * buffer_width, 2* buffer_height, "Space Invaders", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(2 * bufferWidth, 2* bufferHeight, "Space Invaders", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
     }
 
-    glfwSetKeyCallback(window, key_callback);
+    glfwSetKeyCallback(window, keyCallback);
 
     glfwMakeContextCurrent(window);
 
@@ -88,14 +88,14 @@ int main()
     glClearColor(1.0, 0.0, 0.0, 1.0);
 
     // Create graphics buffer
-    data::Buffer buffer(buffer_width, buffer_height);
+    data::Buffer buffer(bufferWidth, bufferHeight);
 
     buffer.clear(0);
 
     // Create texture for presenting buffer to OpenGL
-    GLuint buffer_texture;
-    glGenTextures(1, &buffer_texture);
-    glBindTexture(GL_TEXTURE_2D, buffer_texture);
+    GLuint bufferTexture;
+    glGenTextures(1, &bufferTexture);
+    glBindTexture(GL_TEXTURE_2D, bufferTexture);
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGB8,
         buffer.getWidth(), buffer.getHeight(), 0,
@@ -107,11 +107,11 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // Create vao for generating fullscreen triangle
-    GLuint fullscreen_triangle_vao;
-    glGenVertexArrays(1, &fullscreen_triangle_vao);
+    GLuint fullscreenTriangleVao;
+    glGenVertexArrays(1, &fullscreenTriangleVao);
 
     // Create shader for displaying buffer
-    const char* vertex_shader = 
+    const char* vertexShader =
         "\n"
         "#version 330\n"
         "\n"
@@ -124,7 +124,7 @@ int main()
         "    \n"
         "    gl_Position = vec4(2.0 * TexCoord - 1.0, 0.0, 1.0);\n"
         "}\n";
-    const char* fragment_shader = 
+    const char* fragmentShader =
         "\n"
         "#version 330\n"
         "\n"
@@ -137,59 +137,59 @@ int main()
         "    outColor = texture(buffer, TexCoord).rgb;\n"
         "}\n";
 
-    GLuint shader_id = glCreateProgram();
+    GLuint shaderId = glCreateProgram();
     // Create vertex shader
     {
-        GLuint shader_vp = glCreateShader(GL_VERTEX_SHADER);
+        GLuint shaderVp = glCreateShader(GL_VERTEX_SHADER);
 
-        glShaderSource(shader_vp, 1, &vertex_shader, 0);
-        glCompileShader(shader_vp);
-        util::validate_shader(shader_vp, vertex_shader);
-        glAttachShader(shader_id, shader_vp);
+        glShaderSource(shaderVp, 1, &vertexShader, 0);
+        glCompileShader(shaderVp);
+        util::validateShader(shaderVp, vertexShader);
+        glAttachShader(shaderId, shaderVp);
 
-        glDeleteShader(shader_vp);
+        glDeleteShader(shaderVp);
     }
 
     // Create fragment shader
     {
-        GLuint shader_fp = glCreateShader(GL_FRAGMENT_SHADER);
+        GLuint shaderFp = glCreateShader(GL_FRAGMENT_SHADER);
 
-        glShaderSource(shader_fp, 1, &fragment_shader, 0);
-        glCompileShader(shader_fp);
-        util::validate_shader(shader_fp, fragment_shader);
-        glAttachShader(shader_id, shader_fp);
+        glShaderSource(shaderFp, 1, &fragmentShader, 0);
+        glCompileShader(shaderFp);
+        util::validateShader(shaderFp, fragmentShader);
+        glAttachShader(shaderId, shaderFp);
 
-        glDeleteShader(shader_fp);
+        glDeleteShader(shaderFp);
     }
 
-    glLinkProgram(shader_id);
+    glLinkProgram(shaderId);
 
-    if (!util::validate_program(shader_id)) {
+    if (!util::validateProgram(shaderId)) {
         fprintf(stderr, "Error while validating shader.\n");
         glfwTerminate();
-        glDeleteVertexArrays(1, &fullscreen_triangle_vao);
+        glDeleteVertexArrays(1, &fullscreenTriangleVao);
         return -1;
     }
 
-    glUseProgram(shader_id);
+    glUseProgram(shaderId);
 
-    GLint location = glGetUniformLocation(shader_id, "buffer");
+    GLint location = glGetUniformLocation(shaderId, "buffer");
     glUniform1i(location, 0);
 
     // OpenGL setup
     glDisable(GL_DEPTH_TEST);
     glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(fullscreen_triangle_vao);
+    glBindVertexArray(fullscreenTriangleVao);
 
     // Prepare game
-    sprites::initialize_aliens();
+    sprites::initializeAliens();
 
     data::Game game;
-    game.width = buffer_width;
-    game.height = buffer_height;
-    game.num_aliens = 55;
-    game.num_bullets = 0;
-    game.aliens = new data::Alien[game.num_aliens];
+    game.width = bufferWidth;
+    game.height = bufferHeight;
+    game.numAliens = 55;
+    game.numBullets = 0;
+    game.aliens = new data::Alien[game.numAliens];
 
     game.player.x = 112 - 5;
     game.player.y = 32;
@@ -200,7 +200,7 @@ int main()
         for (size_t xi = 0; xi < 11; ++xi) {
             data::Alien& alien = game.aliens[yi * 11 + xi];
             alien.type = (5 - yi) / 2 + 1;
-            
+
             const data::Sprite& sprite = sprites::ALIEN_SPRITES[2 * (alien.type - 1)];
 
             alien.x = 16 * xi + 20 + (sprites::ALIEN_DEATH_SPRITE.width - sprite.width) / 2;
@@ -208,75 +208,75 @@ int main()
         }
     }
 
-    uint8_t* death_counters = new uint8_t[game.num_aliens];
-    for (size_t i = 0; i < game.num_aliens; ++i) {
-        death_counters[i] = 10;
+    uint8_t* deathCounters = new uint8_t[game.numAliens];
+    for (size_t i = 0; i < game.numAliens; ++i) {
+        deathCounters[i] = 10;
     }
 
-    uint32_t clear_color = util::rgb_to_uint32(0, 128, 0);
+    uint32_t clearColor = util::rgbToUint32(0, 128, 0);
 
-    game_running = true;
+    gameRunning = true;
 
-    int player_move_dir = 0;
+    int playerMoveDir = 0;
     // Game loop
-    while (!glfwWindowShouldClose(window) & game_running) {
-        buffer.clear(clear_color);
+    while (!glfwWindowShouldClose(window) & gameRunning) {
+        buffer.clear(clearColor);
 
-        buffer.draw_text(
+        buffer.drawText(
             sprites::TEXT_SPRITESHEET, "SCORE",
             4, game.height - sprites::TEXT_SPRITESHEET.height - 7,
-            util::rgb_to_uint32(128, 0, 0)
+            util::rgbToUint32(128, 0, 0)
         );
 
-        buffer.draw_number(
+        buffer.drawNumber(
             sprites::NUMBER_SPRITESHEET, score,
             4 + 2 * sprites::NUMBER_SPRITESHEET.width, game.height - 2 * sprites::NUMBER_SPRITESHEET.height - 12,
-            util::rgb_to_uint32(128, 0, 0)
+            util::rgbToUint32(128, 0, 0)
         );
 
-        buffer.draw_text(
+        buffer.drawText(
             sprites::TEXT_SPRITESHEET, "CREDIT 00",
             164, 7,
-            util::rgb_to_uint32(128, 0, 0)
+            util::rgbToUint32(128, 0, 0)
         );
 
         // Line at bottom
         for (size_t i = 0; i < game.width; ++i) {
-            buffer.getVector()[game.width * 16 + i] = util::rgb_to_uint32(128, 0, 0);
+            buffer.getVector()[game.width * 16 + i] = util::rgbToUint32(128, 0, 0);
         }
 
         // Draw aliens
-        for (size_t ai = 0; ai < game.num_aliens; ++ai) {
-            if (!death_counters[ai]) {
+        for (size_t ai = 0; ai < game.numAliens; ++ai) {
+            if (!deathCounters[ai]) {
                 // Dead alien; don't draw
                 continue;
             }
 
             const data::Alien& alien = game.aliens[ai];
             if (alien.type == data::ALIEN_DEAD) {
-                buffer.draw_sprite(sprites::ALIEN_DEATH_SPRITE, alien.x, alien.y, util::rgb_to_uint32(128, 0, 0));
+                buffer.drawSprite(sprites::ALIEN_DEATH_SPRITE, alien.x, alien.y, util::rgbToUint32(128, 0, 0));
             } else {
                 const data::SpriteAnimation& animation = sprites::ALIEN_ANIMATIONS[alien.type - 1];
-                size_t current_frame = animation.time / animation.frame_duration;
+                size_t current_frame = animation.time / animation.frameDuration;
                 const data::Sprite& sprite = *animation.frames[current_frame];
-                buffer.draw_sprite(sprite, alien.x, alien.y, util::rgb_to_uint32(128, 0, 0));
+                buffer.drawSprite(sprite, alien.x, alien.y, util::rgbToUint32(128, 0, 0));
             }
         }
 
         // Draw bullets
-        for (size_t bi = 0; bi < game.num_bullets; ++bi) {
+        for (size_t bi = 0; bi < game.numBullets; ++bi) {
             const data::Bullet& bullet = game.bullets[bi];
             const data::Sprite& sprite = sprites::BULLET_SPRITE;
-            buffer.draw_sprite(sprite, bullet.x, bullet.y, util::rgb_to_uint32(128, 0, 0));
+            buffer.drawSprite(sprite, bullet.x, bullet.y, util::rgbToUint32(128, 0, 0));
         }
 
         // Draw player
-        buffer.draw_sprite(sprites::PLAYER_SPRITE, game.player.x, game.player.y, util::rgb_to_uint32(128, 0, 0));
+        buffer.drawSprite(sprites::PLAYER_SPRITE, game.player.x, game.player.y, util::rgbToUint32(128, 0, 0));
 
         // Update animations
         for (size_t i = 0; i < 3; ++i) {
             ++sprites::ALIEN_ANIMATIONS[i].time;
-            if (sprites::ALIEN_ANIMATIONS[i].time == sprites::ALIEN_ANIMATIONS[i].num_frames * sprites::ALIEN_ANIMATIONS[i].frame_duration) {
+            if (sprites::ALIEN_ANIMATIONS[i].time == sprites::ALIEN_ANIMATIONS[i].numFrames * sprites::ALIEN_ANIMATIONS[i].frameDuration) {
                 sprites::ALIEN_ANIMATIONS[i].time = 0;
             }
         }
@@ -292,32 +292,32 @@ int main()
 
         glfwSwapBuffers(window);
 
-        // Update death_counters
-        for (size_t ai = 0; ai < game.num_aliens; ++ai) {
+        // Update deathCounters
+        for (size_t ai = 0; ai < game.numAliens; ++ai) {
             const data::Alien& alien = game.aliens[ai];
-            if (alien.type == data::ALIEN_DEAD && death_counters[ai]) {
-                --death_counters[ai];
+            if (alien.type == data::ALIEN_DEAD && deathCounters[ai]) {
+                --deathCounters[ai];
             }
         }
 
         // Set direction of bullets
-        for (size_t bi = 0; bi < game.num_bullets;) {
+        for (size_t bi = 0; bi < game.numBullets;) {
             game.bullets[bi].y += game.bullets[bi].dir;
             if (game.bullets[bi].y >= game.height || game.bullets[bi].y < sprites::BULLET_SPRITE.height) {
-                game.bullets[bi] = game.bullets[game.num_bullets - 1];
-                --game.num_bullets;
+                game.bullets[bi] = game.bullets[game.numBullets - 1];
+                --game.numBullets;
                 continue;
             }
-            // Check for alien collision 
-            for (size_t ai = 0; ai < game.num_aliens; ++ai) {
+            // Check for alien collision
+            for (size_t ai = 0; ai < game.numAliens; ++ai) {
                 const data::Alien& alien = game.aliens[ai];
                 if (alien.type == data::ALIEN_DEAD) {
                     continue;
                 }
                 const data::SpriteAnimation& animation = sprites::ALIEN_ANIMATIONS[alien.type - 1];
-                size_t current_frame = animation.time / animation.frame_duration;
+                size_t current_frame = animation.time / animation.frameDuration;
                 const data::Sprite& alien_sprite = *animation.frames[current_frame];
-                bool overlap = util::sprite_overlap_check(
+                bool overlap = util::spriteOverlapCheck(
                     sprites::BULLET_SPRITE, game.bullets[bi].x, game.bullets[bi].y,
                     alien_sprite, alien.x, alien.y
                 );
@@ -325,8 +325,8 @@ int main()
                     score += 10 * (4 - game.aliens[ai].type);
                     game.aliens[ai].type = data::ALIEN_DEAD;
                     game.aliens[ai].x -= (sprites::ALIEN_DEATH_SPRITE.width - alien_sprite.width) / 2;
-                    game.bullets[bi] = game.bullets[game.num_bullets - 1];
-                    --game.num_bullets;
+                    game.bullets[bi] = game.bullets[game.numBullets - 1];
+                    --game.numBullets;
                     continue;
                 }
             }
@@ -334,35 +334,35 @@ int main()
             ++bi;
         }
 
-        player_move_dir = 2 * move_dir;
+        playerMoveDir = 2 * moveDir;
 
-        if (player_move_dir != 0) {
-            if (game.player.x + sprites::PLAYER_SPRITE.width + player_move_dir >= game.width) {
+        if (playerMoveDir != 0) {
+            if (game.player.x + sprites::PLAYER_SPRITE.width + playerMoveDir >= game.width) {
                 game.player.x = game.width - sprites::PLAYER_SPRITE.width;
-            } else if ((int)game.player.x + player_move_dir <= 0) {
+            } else if ((int)game.player.x + playerMoveDir <= 0) {
                 game.player.x = 0;
             } else {
-                game.player.x += player_move_dir;
+                game.player.x += playerMoveDir;
             }
         }
 
-        if (fire_pressed && game.num_bullets < GAME_MAX_BULLETS) {
-            game.bullets[game.num_bullets].x = game.player.x + sprites::PLAYER_SPRITE.width / 2;
-            game.bullets[game.num_bullets].y = game.player.y + sprites::PLAYER_SPRITE.height;
-            game.bullets[game.num_bullets].dir = 2;
-            ++game.num_bullets;
+        if (firePressed && game.numBullets < GAME_MAX_BULLETS) {
+            game.bullets[game.numBullets].x = game.player.x + sprites::PLAYER_SPRITE.width / 2;
+            game.bullets[game.numBullets].y = game.player.y + sprites::PLAYER_SPRITE.height;
+            game.bullets[game.numBullets].dir = 2;
+            ++game.numBullets;
         }
-        fire_pressed = false;
+        firePressed = false;
 
         glfwPollEvents();
     }
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    glDeleteVertexArrays(1, &fullscreen_triangle_vao);
-    sprites::cleanup_aliens();
+    glDeleteVertexArrays(1, &fullscreenTriangleVao);
+    sprites::cleanupAliens();
     delete[] game.aliens;
-    delete[] death_counters;
+    delete[] deathCounters;
 
     return 0;
 }

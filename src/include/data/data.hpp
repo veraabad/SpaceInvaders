@@ -98,16 +98,16 @@ struct Bullet final: Location
  *    - width: Width of the game area.
  *    - height: Height of the game area.
  *
- * @var num_aliens Number of active aliens.
- * @var num_bullets Number of active bullets.
+ * @var numAliens Number of active aliens.
+ * @var numBullets Number of active bullets.
  * @var aliens Pointer to array of alien entities.
  * @var player The player entity.
  * @var bullets Array of bullet entities, limited by GAME_MAX_BULLETS.
  */
 struct Game final: Rectangle
 {
-    size_t num_aliens;
-    size_t num_bullets;
+    size_t numAliens;
+    size_t numBullets;
     Alien* aliens;
     Player player;
     Bullet bullets[GAME_MAX_BULLETS];
@@ -117,16 +117,16 @@ struct Game final: Rectangle
  * @brief Represents an animation sequence for sprites.
  *
  * @var loop Whether the animation should loop.
- * @var num_frames Number of frames in the animation.
- * @var frame_duration Duration of each frame in time units.
+ * @var numFrames Number of frames in the animation.
+ * @var frameDuration Duration of each frame in time units.
  * @var time Current time position in the animation.
  * @var frames Array of pointers to sprite frames.
  */
 struct SpriteAnimation
 {
     bool loop;
-    size_t num_frames;
-    size_t frame_duration;
+    size_t numFrames;
+    size_t frameDuration;
     size_t time;
     Sprite** frames;
 };
@@ -157,10 +157,10 @@ enum AlienType: uint8_t
  *
  * @var data Pointer to pixel data of the buffer.
  */
-class Buffer 
+class Buffer
 {
 public:
-    Buffer(size_t width, size_t height) : width(width), height(height) 
+    Buffer(size_t width, size_t height) : width(width), height(height)
     {
         data = std::vector<uint32_t>(width * height, 0);
     }
@@ -186,12 +186,12 @@ public:
         return data;
     }
 
-    void clear(uint32_t color) 
+    void clear(uint32_t color)
     {
         std::fill(data.begin(), data.end(), color);
     }
 
-    void draw_sprite(
+    void drawSprite(
         const Sprite& sprite,
         size_t x, size_t y, uint32_t color
     ){
@@ -207,28 +207,28 @@ public:
         }
     }
 
-    void draw_text(
-        const data::Sprite& text_spritesheet,
+    void drawText(
+        const data::Sprite& textSpritesheet,
         const char* text,
         size_t x, size_t y,
         uint32_t color)
     {
         size_t xp = x;
-        size_t stride = text_spritesheet.width * text_spritesheet.height;
-        data::Sprite sprite = text_spritesheet;
+        size_t stride = textSpritesheet.width * textSpritesheet.height;
+        data::Sprite sprite = textSpritesheet;
         for (const char* charp = text; *charp != '\0'; ++charp) {
             char character = *charp - 32;
             if (character < 0 || character >= 65) {
                 continue;
             }
-            sprite.data = text_spritesheet.data + character * stride;
-            draw_sprite(sprite, xp, y, color);
+            sprite.data = textSpritesheet.data + character * stride;
+            drawSprite(sprite, xp, y, color);
             xp += sprite.width + 1;
         }
     }
 
-    void draw_number(
-        const data::Sprite& number_spritesheet, size_t number,
+    void drawNumber(
+        const data::Sprite& numberSpritesheet, size_t number,
         size_t x, size_t y,
         uint32_t color
     ){
@@ -242,12 +242,12 @@ public:
         } while (current_number > 0);
 
         size_t xp = x;
-        size_t stride = number_spritesheet.width * number_spritesheet.height;
-        data::Sprite sprite = number_spritesheet;
+        size_t stride = numberSpritesheet.width * numberSpritesheet.height;
+        data::Sprite sprite = numberSpritesheet;
         for (size_t i = 0; i < num_digits; ++i) {
             uint8_t digit = digits[num_digits - i - 1];
-            sprite.data = number_spritesheet.data + digit * stride;
-            draw_sprite(sprite, xp, y, color);
+            sprite.data = numberSpritesheet.data + digit * stride;
+            drawSprite(sprite, xp, y, color);
             xp += sprite.width + 1;
         }
     }
@@ -258,4 +258,4 @@ private:
     std::vector<uint32_t> data;
 };
 
-}
+} // data
