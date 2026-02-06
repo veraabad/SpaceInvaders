@@ -13,7 +13,12 @@ int moveDir = 0;
 bool firePressed = 0;
 size_t score = 0;
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void keyCallback([[maybe_unused]] GLFWwindow* window,
+                 int key,
+                 [[maybe_unused]] int scancode,
+                 int action,
+                 [[maybe_unused]] int mods)
+{
     switch (key) {
         case GLFW_KEY_ESCAPE:
             if (action == GLFW_PRESS) {
