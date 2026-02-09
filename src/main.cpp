@@ -194,7 +194,7 @@ int main()
     game.height = bufferHeight;
     game.numAliens = 55;
     game.numBullets = 0;
-    game.aliens = new data::Alien[game.numAliens];
+    game.aliens = std::vector<data::Alien>(game.numAliens);
 
     game.player.x = 112 - 5;
     game.player.y = 32;
@@ -213,10 +213,7 @@ int main()
         }
     }
 
-    uint8_t* deathCounters = new uint8_t[game.numAliens];
-    for (size_t i = 0; i < game.numAliens; ++i) {
-        deathCounters[i] = 10;
-    }
+    std::vector<uint8_t> deathCounters(game.numAliens, 10);
 
     uint32_t clearColor = util::rgbToUint32(0, 128, 0);
 
@@ -365,9 +362,6 @@ int main()
     glfwTerminate();
 
     glDeleteVertexArrays(1, &fullscreenTriangleVao);
-    sprites::cleanupAliens();
-    delete[] game.aliens;
-    delete[] deathCounters;
 
     return 0;
 }

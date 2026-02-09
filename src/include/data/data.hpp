@@ -45,6 +45,8 @@ struct Sprite final: Rectangle
     uint8_t* data;
 };
 
+using SpriteFrames = std::vector<std::shared_ptr<Sprite>>;
+
 /**
  * @brief Represents an alien entity with position and type information.
  * @details Inherits from Location and adds alien type information.
@@ -100,7 +102,7 @@ struct Bullet final: Location
  *
  * @var numAliens Number of active aliens.
  * @var numBullets Number of active bullets.
- * @var aliens Pointer to array of alien entities.
+ * @var aliens Vector of alien entities.
  * @var player The player entity.
  * @var bullets Array of bullet entities, limited by GAME_MAX_BULLETS.
  */
@@ -108,7 +110,7 @@ struct Game final: Rectangle
 {
     size_t numAliens;
     size_t numBullets;
-    Alien* aliens;
+    std::vector<Alien> aliens;
     Player player;
     Bullet bullets[GAME_MAX_BULLETS];
 };
@@ -128,7 +130,7 @@ struct SpriteAnimation
     size_t numFrames;
     size_t frameDuration;
     size_t time;
-    Sprite** frames;
+    SpriteFrames frames;
 };
 
 /**

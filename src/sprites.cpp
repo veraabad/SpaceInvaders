@@ -4,7 +4,7 @@
 
 namespace sprites {
 
-static data::Sprite** animationFrames[3] = {nullptr, nullptr, nullptr};
+static std::vector<data::SpriteFrames> animationFrames(3);
 
 const data::Sprite ALIEN_SPRITES[6] {
     // Alien 1
@@ -32,7 +32,7 @@ const data::Sprite ALIEN_SPRITES[6] {
         {12, 8}, // width, height
         const_cast<uint8_t*>(ALIEN_SPRITE_5)
     },
-    // Alien 1
+    // Alien 6
     {
         {12, 8}, // width, height
         const_cast<uint8_t*>(ALIEN_SPRITE_6)
@@ -45,9 +45,9 @@ const data::Sprite ALIEN_DEATH_SPRITE {
 };
 
 data::SpriteAnimation ALIEN_ANIMATIONS[3] = {
-     {true, 2, 10, 0, nullptr},
-     {true, 2, 10, 0, nullptr},
-     {true, 2, 10, 0, nullptr},
+     {true, 2, 10, 0, data::SpriteFrames()},
+     {true, 2, 10, 0, data::SpriteFrames()},
+     {true, 2, 10, 0, data::SpriteFrames()},
 };
 
 const data::Sprite PLAYER_SPRITE{
@@ -73,18 +73,10 @@ const data::Sprite NUMBER_SPRITESHEET{
 void initializeAliens()
 {
     for (size_t i = 0; i < 3; ++i) {
-        animationFrames[i] = new data::Sprite*[2];
-        animationFrames[i][0] = const_cast<data::Sprite*>(&ALIEN_SPRITES[2 * i]);
-        animationFrames[i][1] = const_cast<data::Sprite*>(&ALIEN_SPRITES[2 * i + 1]);
+        animationFrames[i] = data::SpriteFrames(2);
+        animationFrames[i][0] = std::make_shared<data::Sprite>(ALIEN_SPRITES[2 * i]);
+        animationFrames[i][1] = std::make_shared<data::Sprite>(ALIEN_SPRITES[2 * i + 1]);
         ALIEN_ANIMATIONS[i].frames = animationFrames[i];
-    }
-}
-
-void cleanupAliens()
-{
-    for (size_t i = 0; i < 3; ++i) {
-        delete[] animationFrames[i];
-        animationFrames[i] = nullptr;
     }
 }
 
